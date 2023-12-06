@@ -7,7 +7,10 @@
 // After finishing prototyping, you can power Nano by connecting a 9V battery to Vin pin 
 
 /***** IR Sensor *****/
-#define ir_sensor A2 // A0 pin on the sensor
+#define ir_sensor0 A0 // A0 pin on the sensor
+#define ir_sensor1 A1 // A1 pin on the sensor
+#define ir_sensor2 A2 // A2 pin on the sensor
+#define ir_sensor3 A3 // A2 pin on the sensor
 // Vcc -> 5V
 // GND -> GND
 
@@ -36,7 +39,10 @@ int dc_output = 0;
 
 void setup() {
   /****** IR Sensor ******/
-  pinMode(ir_sensor, INPUT);
+  pinMode(ir_sensor0, INPUT);
+  pinMode(ir_sensor1, INPUT);
+  pinMode(ir_sensor2, INPUT);
+  pinMode(ir_sensor3, INPUT);
 
   /***** Servo Motor *****/
   pinMode(servo_pin, OUTPUT);
@@ -54,7 +60,17 @@ void setup() {
 
 void loop() {
   /* Read from the IR Sensor */
-  Serial.println(analogRead(ir_sensor));
+  Serial.print("ir0: ");
+  Serial.print(analogRead(ir_sensor0));
+  Serial.print(", ir1: ");
+  Serial.print(analogRead(ir_sensor1));
+  Serial.print(", ir2: ");
+  Serial.print(analogRead(ir_sensor2));
+  Serial.print(", ir3: ");
+  Serial.print(analogRead(ir_sensor3));
+  Serial.print("\n");
+
+  
 
   /* Rotate the servo motor (by degree) */
   myservo.write((servo_output += 10) % 180);
