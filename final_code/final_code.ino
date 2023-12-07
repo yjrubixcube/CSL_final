@@ -82,27 +82,32 @@ void loop() {
   /* Rotate the servo motor (by degree) */
   // myservo.write((servo_output += 10) % 180);
   /* Rotate the servo by input*/
-  String str = "";
-  int integer = "";
-//   Serial.println("start");
-  while (Serial.available() > 0){
-    int angle = Serial.read();
-    if (isDigit(angle)) str += char(angle);
-    if (angle == '\n'){
-      integer = str.toInt();
-      Serial.println(integer);
-      Serial.println(str);
-      str = "";
+//   String str = "";
+//   int integer = "";
+// //   Serial.println("start");
+//   while (Serial.available() > 0){
+//     int angle = Serial.read();
+//     if (isDigit(angle)) str += char(angle);
+//     if (angle == '\n'){
+//       integer = str.toInt();
+//       Serial.println(integer);
+//       Serial.println(str);
+//       str = "";
 
-      myservo.write(integer);
-    }
-  }
+//       myservo.write(integer);
+//     }
+//   }
 
   /* Set DC motor direction and power */
   setDirection(dc_dir);
-  analogWrite(ENA, (dc_output += 63) % 255);
+  analogWrite(ENA, 255);
   
-  delay(500);
+  delay(1000);
+  analogWrite(ENA, 125);
+  delay(1000);
+  setDirection(1);
+  analogWrite(ENA, 100);
+  delay(750);
 }
 
 void setDirection(int dir){
