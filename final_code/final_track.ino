@@ -149,7 +149,7 @@ void loop() {
     dc_dir = 0;
     setDirection(dc_dir);
     analogWrite(ENA, 255);
-    delay(500);
+    delay(250);
   }
 }
 
