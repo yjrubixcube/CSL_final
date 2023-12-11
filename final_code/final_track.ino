@@ -56,14 +56,14 @@ int ir0_val = 0;
 int ir1_val = 0;
 int ir2_val = 0;
 int ir3_val = 0;
-int ir0_col = 0;
-int ir1_col = 0;
-int ir2_col = 0;
-int ir3_col = 0;
-int ir0_col_pre = 0;
-int ir1_col_pre = 0;
-int ir2_col_pre = 0;
-int ir3_col_pre = 0;
+int ir0_col = -1;
+int ir1_col = -1;
+int ir2_col = -1;
+int ir3_col = -1;
+int ir0_col_pre = -1;
+int ir1_col_pre = -1;
+int ir2_col_pre = -1;
+int ir3_col_pre = -1;
 
 
 
@@ -127,13 +127,13 @@ void loop() {
   //Turning via servo
   if(ir0_col==BLACK){
     Serial.print("right ");
-    servo_output = MID_SERVO + 20;
+    servo_output = MID_SERVO + 10;
     if(servo_output > MAX_SERVO)
       servo_output = MAX_SERVO;
   }
   else if(ir3_col==BLACK){
     Serial.print("left ");
-    servo_output = MID_SERVO - 20;
+    servo_output = MID_SERVO - 10;
     if(servo_output < MIN_SERVO)
       servo_output = MIN_SERVO;
   }
@@ -162,8 +162,8 @@ void loop() {
   else{
     dc_dir = 0;
     setDirection(dc_dir);
-    analogWrite(ENA, 255);
-    delay(500);
+    analogWrite(ENA, 160);
+    delay(30);
   }
   ir0_col_pre = ir0_col;
   ir1_col_pre = ir1_col;
