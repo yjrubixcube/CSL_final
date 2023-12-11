@@ -56,6 +56,15 @@ int ir0_val = 0;
 int ir1_val = 0;
 int ir2_val = 0;
 int ir3_val = 0;
+int ir0_col = 0;
+int ir1_col = 0;
+int ir2_col = 0;
+int ir3_col = 0;
+int ir0_col_pre = 0;
+int ir1_col_pre = 0;
+int ir2_col_pre = 0;
+int ir3_col_pre = 0;
+
 
 
 void setup() {
@@ -96,28 +105,33 @@ void loop() {
     ir3_val = analogRead(ir_sensor3);
 
     //PRINT IR COLOR
+    ir0_col = ir0_color(ir0_val);
+    ir1_col = ir1_color(ir1_val);
+    ir2_col = ir2_color(ir2_val);
+    ir3_col = ir3_color(ir3_val);
     Serial.print("ir0: ");
-    Serial.print(ir0_color(ir0_val));
+    Serial.print(ir0_col);
     Serial.print(", ir1: ");
-    Serial.print(ir1_color(ir1_val));
+    Serial.print(ir1_col);
     Serial.print(", ir2: ");
-    Serial.print(ir2_color(ir2_val));
+    Serial.print(ir2_col);
     Serial.print(", ir3: ");
-    Serial.print(ir3_color(ir3_val));
+    Serial.print(ir3_col);
 
   // Count black box
-  if(ir1_color(ir1_val) == BLACK || ir2_color(ir2_val) == BLACK){
+  if(ir1_col_pre != BLACK && ir1_col == BLACK)
     black_count += 1;
-  }
+  else if(ir2_col_pre != BLACK && ir2_col == BLACK)
+    black_count += 1;
 
   //Turning via servo
-  if(ir0_color(ir0_val)==BLACK){
+  if(ir0_col==BLACK){
     Serial.print("right ");
     servo_output = MID_SERVO + 20;
     if(servo_output > MAX_SERVO)
       servo_output = MAX_SERVO;
   }
-  else if(ir3_color(ir3_val)==BLACK){
+  else if(ir3_col==BLACK){
     Serial.print("left ");
     servo_output = MID_SERVO - 20;
     if(servo_output < MIN_SERVO)
@@ -149,8 +163,12 @@ void loop() {
     dc_dir = 0;
     setDirection(dc_dir);
     analogWrite(ENA, 255);
-    delay(250);
+    delay(500);
   }
+  ir0_col_pre = ir0_col;
+  ir1_col_pre = ir1_col;
+  ir2_col_pre = ir2_col;
+  ir3_col_pre = ir3_col;
 }
 
 void setDirection(int dir){
