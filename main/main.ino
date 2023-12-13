@@ -41,13 +41,16 @@ int servo_step = 5;
 #define BLACK 2
 
 //IR Sensor white gray threshold
-#define WG0 45
-#define WG1 40
-#define WG2 38
-#define WG3 35
+#define WG0 43
+#define WG1 41
+#define WG2 62
+#define WG3 39
 
 //IR Sensor black gray threshold
-#define BG 80
+#define BG0 150
+#define BG1 150
+#define BG2 80
+#define BG3 55
 
 // car state
 #define READY_TO_MOVE 0
@@ -57,8 +60,8 @@ int servo_step = 5;
 int car_state = 0;
 int speed = 0;
 int start_speed = 200;
-int min_speed = 120;
-int max_speed = 200;
+int min_speed = 135;
+int max_speed = 160;
 
 int dc_dir = 0;
 int dc_output = 0;
@@ -80,7 +83,7 @@ int ir3_col_pre = -1;
 int pre_color = -1;
 int cur_color = -1;
 
-
+int mid_back_count = 0;
 
 
 
@@ -153,6 +156,7 @@ void loop() {
   Serial.print("\n");
 
   // Turn
+  /* 
   if(ir0_col == BLACK || ir0_col == WHITE){
     Serial.print("right ");
     servo_output += servo_step;
@@ -167,6 +171,46 @@ void loop() {
   }
   else{
     Serial.print("mid ");
+    if(servo_output > MID_SERVO+2)
+      servo_output -= 2;
+    else if(servo_output < MID_SERVO-2)
+      servo_output += 2;
+  } */
+
+  if (((ir0_col == BLACK && ir1_col == BLACK) || (ir0_col == WHITE && ir1_col == WHITE))) {
+    Serial.print("right ");
+    servo_output += servo_step;
+    if(servo_output > MAX_SERVO-15)
+      servo_output = MAX_SERVO-15;
+  }
+  else if (ir0_col == BLACK || ir0_col == WHITE) {
+    Serial.print("right MAX ");
+    servo_output += servo_step;
+    if(servo_output > MAX_SERVO)
+      servo_output = MAX_SERVO;
+  }
+  else if (((ir3_col == BLACK && ir2_col == BLACK) || (ir3_col == WHITE && ir2_col == WHITE))){
+    Serial.print("left ");
+    servo_output -= servo_step;
+    if(servo_output < MIN_SERVO+15)
+      servo_output = MIN_SERVO+15;
+  }
+  else if (ir3_col == BLACK || ir3_col == WHITE) {
+    Serial.print("left MAX ");
+    servo_output -= servo_step;
+    if(servo_output < MIN_SERVO)
+      servo_output = MIN_SERVO;
+  }
+  else {
+    Serial.print("mid ");
+    mid_back_count ++;
+    if (mid_back_count >= 5) {
+      mid_back_count = 0;
+      if(servo_output > MID_SERVO+2)
+        servo_output -= 1;
+      else if(servo_output < MID_SERVO-2)
+        servo_output += 1;
+    }
   }
 
   //print servo val
@@ -202,8 +246,8 @@ void loop() {
     delay(20);
   }
   else if (car_state == READY_TO_STOP){
-    setDirection(1);
-    analogWrite(ENA, 100);
+    setDirection(0);
+    analogWrite(ENA, speed);
     delay(20);
   }
   else if (car_state == STOP){
@@ -230,7 +274,7 @@ void setDirection(int dir){
 int ir0_color(int val){
   if(val<=WG0)
     return WHITE;
-  else if(val<=BG)
+  else if(val<=BG0)
     return GRAY;
   else
     return BLACK;
@@ -239,7 +283,7 @@ int ir0_color(int val){
 int ir1_color(int val){
   if(val<=WG1)
     return WHITE;
-  else if(val<=BG)
+  else if(val<=BG1)
     return GRAY;
   else
     return BLACK;
@@ -248,7 +292,7 @@ int ir1_color(int val){
 int ir2_color(int val){
   if(val<=WG2)
     return WHITE;
-  else if(val<=BG)
+  else if(val<=BG2)
     return GRAY;
   else
     return BLACK;
@@ -257,7 +301,7 @@ int ir2_color(int val){
 int ir3_color(int val){
   if(val<=WG3)
     return WHITE;
-  else if(val<=BG)
+  else if(val<=BG3)
     return GRAY;
   else
     return BLACK;
