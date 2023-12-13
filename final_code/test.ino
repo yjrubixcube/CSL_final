@@ -76,7 +76,7 @@ void loop() {
   Serial.print(", ir3: ");
   Serial.print(analogRead(ir_sensor3));
   Serial.print("\n");
-
+  delay(500);
   
 
   /* Rotate the servo motor (by degree) */
@@ -102,12 +102,10 @@ void loop() {
   setDirection(dc_dir);
   analogWrite(ENA, 255);
   
-  delay(1000);
-  analogWrite(ENA, 125);
-  delay(1000);
+  //delay(2000);
   setDirection(1);
-  analogWrite(ENA, 100);
-  delay(750);
+  analogWrite(ENA, 0);
+  //delay(3000);
 }
 
 void setDirection(int dir){

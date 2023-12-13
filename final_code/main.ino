@@ -22,11 +22,11 @@
 
 #include <Servo.h>
 Servo myservo;
-#define MIN_SERVO 30
-#define MAX_SERVO 120
-#define MID_SERVO 75
-int servo_output = 0;
-
+#define MIN_SERVO 37
+#define MAX_SERVO 117
+#define MID_SERVO 77
+int servo_output = MID_SERVO;
+int servo_step = 5;
 
 /***** DC Motor (L298N) *****/
 #define ENA 5 // (pwm)
@@ -49,9 +49,21 @@ int servo_output = 0;
 //IR Sensor black gray threshold
 #define BG 80
 
+// car state
+#define READY_TO_MOVE 0
+#define MOVING 1
+#define READY_TO_STOP 2
+#define STOP 3
+int car_state = 0;
+int speed = 0;
+int start_speed = 200;
+int min_speed = 120;
+int max_speed = 200;
+
 int dc_dir = 0;
 int dc_output = 0;
 int black_count = 0;
+
 int ir0_val = 0;
 int ir1_val = 0;
 int ir2_val = 0;
@@ -64,6 +76,12 @@ int ir0_col_pre = -1;
 int ir1_col_pre = -1;
 int ir2_col_pre = -1;
 int ir3_col_pre = -1;
+
+int pre_color = -1;
+int cur_color = -1;
+
+
+
 
 
 
@@ -90,85 +108,112 @@ void setup() {
 
 void loop() {
   /* Read from the IR Sensor */
-    Serial.print("ir0: ");
-    Serial.print(analogRead(ir_sensor0));
-    Serial.print(", ir1: ");
-    Serial.print(analogRead(ir_sensor1));
-    Serial.print(", ir2: ");
-    Serial.print(analogRead(ir_sensor2));
-    Serial.print(", ir3: ");
-    Serial.print(analogRead(ir_sensor3));
-    Serial.print("\n");
-    ir0_val = analogRead(ir_sensor0);
-    ir1_val = analogRead(ir_sensor1);
-    ir2_val = analogRead(ir_sensor2);
-    ir3_val = analogRead(ir_sensor3);
+  Serial.print("ir0: ");
+  Serial.print(analogRead(ir_sensor0));
+  Serial.print(", ir1: ");
+  Serial.print(analogRead(ir_sensor1));
+  Serial.print(", ir2: ");
+  Serial.print(analogRead(ir_sensor2));
+  Serial.print(", ir3: ");
+  Serial.print(analogRead(ir_sensor3));
+  Serial.print("\n");
+  ir0_val = analogRead(ir_sensor0);
+  ir1_val = analogRead(ir_sensor1);
+  ir2_val = analogRead(ir_sensor2);
+  ir3_val = analogRead(ir_sensor3);
 
-    //PRINT IR COLOR
-    ir0_col = ir0_color(ir0_val);
-    ir1_col = ir1_color(ir1_val);
-    ir2_col = ir2_color(ir2_val);
-    ir3_col = ir3_color(ir3_val);
-    Serial.print("ir0: ");
-    Serial.print(ir0_col);
-    Serial.print(", ir1: ");
-    Serial.print(ir1_col);
-    Serial.print(", ir2: ");
-    Serial.print(ir2_col);
-    Serial.print(", ir3: ");
-    Serial.print(ir3_col);
+  //PRINT IR COLOR
+  ir0_col = ir0_color(ir0_val);
+  ir1_col = ir1_color(ir1_val);
+  ir2_col = ir2_color(ir2_val);
+  ir3_col = ir3_color(ir3_val);
+  Serial.print("ir0: ");
+  Serial.print(ir0_col);
+  Serial.print(", ir1: ");
+  Serial.print(ir1_col);
+  Serial.print(", ir2: ");
+  Serial.print(ir2_col);
+  Serial.print(", ir3: ");
+  Serial.print(ir3_col);
+
+  
+  // current color touched
+  if(ir1_col == BLACK || ir2_col == BLACK)
+    cur_color = BLACK;
+  else
+    cur_color = -1;
 
   // Count black box
-  if(ir1_col_pre != BLACK && ir1_col == BLACK)
+  if(pre_color != BLACK && cur_color == BLACK)
     black_count += 1;
-  else if(ir2_col_pre != BLACK && ir2_col == BLACK)
-    black_count += 1;
-
-  //Turning via servo
-  if(ir0_col==BLACK){
-    Serial.print("right ");
-    servo_output = MID_SERVO + 10;
-    if(servo_output > MAX_SERVO)
-      servo_output = MAX_SERVO;
-  }
-  else if(ir3_col==BLACK){
-    Serial.print("left ");
-    servo_output = MID_SERVO - 10;
-    if(servo_output < MIN_SERVO)
-      servo_output = MIN_SERVO;
-  }
-  else{
-    Serial.print("mid ");
-    servo_output = MID_SERVO;
-  }
-  //print servo val
-  myservo.write(servo_output);
-  Serial.print(", servo_output: ");
-  Serial.print(servo_output);
 
   //print black count
   Serial.print(", black count: ");
   Serial.print(black_count);
   Serial.print("\n");
 
-  //Stop 3s when 10 black
-  if(black_count == 10){
-    black_count = 0;
-    dc_dir = 1;
-    setDirection(dc_dir);
-    analogWrite(ENA, 0);
-    delay(3000);
+  // Turn
+  if(ir0_col == BLACK || ir0_col == WHITE){
+    Serial.print("right ");
+    servo_output += servo_step;
+    if(servo_output > MAX_SERVO)
+      servo_output = MAX_SERVO;
+  }
+  else if(ir3_col == BLACK || ir3_col == WHITE){
+    Serial.print("left ");
+    servo_output -= servo_step;
+    if(servo_output < MIN_SERVO)
+      servo_output = MIN_SERVO;
   }
   else{
-    dc_dir = 0;
-    setDirection(dc_dir);
-    analogWrite(ENA, 160);
-    delay(30);
+    Serial.print("mid ");
   }
-  ir0_col_pre = ir0_col;
-  ir1_col_pre = ir1_col;
-  ir2_col_pre = ir2_col;
-  ir3_col_pre = ir3_col;
+
+  //print servo val
+  myservo.write(servo_output);
+  Serial.print(", servo_output: ");
+  Serial.print(servo_output);
+
+  // speed control
+  speed = min_speed + (max_speed - min_speed) * pow(abs(servo_output -  MID_SERVO) / (MAX_SERVO - MID_SERVO), 2);
+
+  // decide car state
+  // start moving
+  if (black_count == 1){
+    car_state = MOVING;
+  }
+  // slow down
+  if (black_count == 9){
+    car_state = READY_TO_STOP;
+  }
+  // stop
+  else if (black_count == 10){
+    black_count = 0;
+    car_state = STOP;
+  }
+  
+  if (car_state == READY_TO_MOVE){
+    setDirection(0);
+    analogWrite(ENA, start_speed);
+    delay(20);
+  }
+  else if (car_state == MOVING){
+    analogWrite(ENA, speed);
+    delay(20);
+  }
+  else if (car_state == READY_TO_STOP){
+    setDirection(1);
+    analogWrite(ENA, 100);
+    delay(20);
+  }
+  else if (car_state == STOP){
+    analogWrite(ENA, 0);
+    delay(3000);
+    car_state = READY_TO_MOVE;
+  }
+  
+  pre_color = cur_color;
+
 }
 
 void setDirection(int dir){
