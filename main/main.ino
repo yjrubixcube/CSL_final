@@ -22,9 +22,9 @@
 
 #include <Servo.h>
 Servo myservo;
-#define MIN_SERVO 37
-#define MAX_SERVO 117
-#define MID_SERVO 77
+#define MIN_SERVO 35
+#define MAX_SERVO 115
+#define MID_SERVO 75
 int servo_output = MID_SERVO;
 int servo_step = 5;
 
@@ -41,17 +41,41 @@ int servo_step = 5;
 #define BLACK 2
 
 //IR Sensor white gray threshold
-#define WG0 43
-#define WG1 41
-#define WG2 62
-#define WG3 39
+// wave track
+// #define WG0 40
+// #define WG1 97
+// #define WG2 59
+// #define WG3 39
 
+// straight track
+// #define WG0 40
+// #define WG1 90
+// #define WG2 47
+// #define WG3 40
+
+// irregular track
+#define WG0 45
+#define WG1 70
+#define WG2 52
+#define WG3 40
 //IR Sensor black gray threshold
-#define BG0 150
-#define BG1 150
-#define BG2 80
-#define BG3 55
+// wave track
+// #define BG0 150
+// #define BG1 200
+// #define BG2 75
+// #define BG3 70
 
+// straight track
+// #define BG0 150
+// #define BG1 150
+// #define BG2 80
+// #define BG3 100
+
+// irregular track
+#define BG0 100
+#define BG1 170
+#define BG2 70
+#define BG3 100
 // car state
 #define READY_TO_MOVE 0
 #define MOVING 1
