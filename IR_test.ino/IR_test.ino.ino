@@ -9,7 +9,10 @@
 #include <string.h>
 
 /***** IR Sensor *****/
-#define ir_sensor A2 // A0 pin on the sensor
+#define ir_sensor0 A0 // A0 pin on the sensor
+#define ir_sensor1 A1 // A1 pin on the sensor
+#define ir_sensor2 A2 // A2 pin on the sensor
+#define ir_sensor3 A3 // A2 pin on the sensor
 // Vcc -> 5V
 // GND -> GND
 
@@ -21,11 +24,11 @@
 
 #include <Servo.h>
 Servo myservo;
-int servo_output = 0;
-int MIN_SERVO = 30;
-int MAX_SERVO = 120;
-int MID_SERVO = 75;
+int MIN_SERVO = 37;
+int MAX_SERVO = 117;
+int MID_SERVO = 77;
 // midpoint: 75
+int servo_output = MID_SERVO;
 // min max 30, 120
 
 /***** DC Motor (L298N) *****/
@@ -42,7 +45,10 @@ int dc_output = 0;
 
 void setup() {
   /****** IR Sensor ******/
-  pinMode(ir_sensor, INPUT);
+  pinMode(ir_sensor0, INPUT);
+  pinMode(ir_sensor1, INPUT);
+  pinMode(ir_sensor2, INPUT);
+  pinMode(ir_sensor3, INPUT);
 
   /***** Servo Motor *****/
   pinMode(servo_pin, OUTPUT);
@@ -60,7 +66,15 @@ void setup() {
 
 void loop() {
   /* Read from the IR Sensor */
-  Serial.println(analogRead(ir_sensor));
+  Serial.print("ir0: ");
+  Serial.print(analogRead(ir_sensor0));
+  Serial.print(", ir1: ");
+  Serial.print(analogRead(ir_sensor1));
+  Serial.print(", ir2: ");
+  Serial.print(analogRead(ir_sensor2));
+  Serial.print(", ir3: ");
+  Serial.print(analogRead(ir_sensor3));
+  Serial.print("\n");
   // float angle = Serial.read()
   String str = "";
   int integer = "";
@@ -82,9 +96,6 @@ void loop() {
   // myservo.write(180)
 
   /* Set DC motor direction and power */
-  setDirection(dc_dir);
-  analogWrite(ENA, (dc_output += 63) % 255);
-  dc_dir = 1 - dc_dir;
   delay(500);
 }
 
